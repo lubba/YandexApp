@@ -1,1 +1,1 @@
-include ':app', ':yaframe'
+include ':app', ':yaframe', ':yandex-disk-sdk'
