@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -88,6 +89,7 @@ public class DeleteItemFragment extends IODialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
@@ -133,10 +135,7 @@ public class DeleteItemFragment extends IODialogFragment {
                     try {
                         client = TransportClient.getInstance(context, credentials);
                         client.delete(path);
-                    } catch (IOException ex) {
-                        Log.d(TAG, "deleteItem", ex);
-                        sendException(ex);
-                    } catch (WebdavException ex) {
+                    } catch (IOException | WebdavException ex) {
                         Log.d(TAG, "deleteItem", ex);
                         sendException(ex);
                     } finally {

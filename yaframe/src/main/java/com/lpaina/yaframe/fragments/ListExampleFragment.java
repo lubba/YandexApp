@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
@@ -88,7 +89,6 @@ public class ListExampleFragment extends ListFragment implements LoaderManager.L
             currentDir = ROOT;
         }
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(!ROOT.equals(currentDir));
-
         adapter = new ListExampleAdapter(getActivity());
         setListAdapter(adapter);
         setListShown(false);
@@ -316,6 +316,7 @@ public class ListExampleFragment extends ListFragment implements LoaderManager.L
             currentDir = getArguments().getString(CURRENT_DIR);
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final View view = getActivity().getLayoutInflater().inflate(R.layout.make_folder_layout, null);
@@ -342,6 +343,7 @@ public class ListExampleFragment extends ListFragment implements LoaderManager.L
             return newInstance(new DeleteItemDialogFragment(), credentials, listItem);
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return new AlertDialog.Builder(getActivity())
@@ -366,6 +368,7 @@ public class ListExampleFragment extends ListFragment implements LoaderManager.L
             return newInstance(new RenameMoveDialogFragment(), credentials, listItem);
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             final View view = getActivity().getLayoutInflater().inflate(R.layout.make_folder_layout, null);
@@ -393,6 +396,7 @@ public class ListExampleFragment extends ListFragment implements LoaderManager.L
             return newInstance(new ShowPublicUrlDialogFragment(), credentials, listItem);
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return new AlertDialog.Builder(getActivity())

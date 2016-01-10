@@ -13,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
@@ -85,6 +86,7 @@ public class DownloadFileFragment extends IODialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
@@ -120,11 +122,13 @@ public class DownloadFileFragment extends IODialogFragment {
     }
 
     private void makeWorldReadableAndOpenFile(File file) {
-        file.setReadable(true, false);
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(file), item.getContentType());
-        startActivity(Intent.createChooser(intent, getText(R.string.example_loading_file_chooser_title)));
+        final boolean readable = file.setReadable(true, false);
+        if (readable) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setDataAndType(Uri.fromFile(file), item.getContentType());
+            startActivity(Intent.createChooser(intent, getText(R.string.example_loading_file_chooser_title)));
+        }
     }
 
     public void setDownloadProgress(long loaded, long total) {
@@ -158,10 +162,7 @@ public class DownloadFileFragment extends IODialogFragment {
                         client = TransportClient.getInstance(context, credentials);
                         client.downloadFile(item.getFullPath(), result, DownloadFileRetainedFragment.this);
                         downloadComplete();
-                    } catch (IOException ex) {
-                        Log.d(TAG, "loadFile", ex);
-                        sendException(ex);
-                    } catch (WebdavException ex) {
+                    } catch (IOException | WebdavException ex) {
                         Log.d(TAG, "loadFile", ex);
                         sendException(ex);
                     } finally {

@@ -11,6 +11,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -87,6 +88,7 @@ public class UploadFileFragment extends IODialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
@@ -152,10 +154,7 @@ public class UploadFileFragment extends IODialogFragment {
                         uploadComplete();
                     } catch (CancelledUploadingException ex) {
                         // cancelled by user
-                    } catch (IOException ex) {
-                        Log.d(TAG, "loadFile", ex);
-                        sendException(ex);
-                    } catch (WebdavException ex) {
+                    } catch (IOException | WebdavException ex) {
                         Log.d(TAG, "loadFile", ex);
                         sendException(ex);
                     } finally {

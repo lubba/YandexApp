@@ -27,11 +27,11 @@ import java.util.List;
 
 public class ListExampleLoader extends AsyncTaskLoader<List<ListItem>> {
 
-    private static String TAG = "ListExampleLoader";
+    private static final String TAG = "ListExampleLoader";
 
-    private Credentials credentials;
-    private String dir;
-    private Handler handler;
+    private final Credentials credentials;
+    private final String dir;
+    private final Handler handler;
 
     private List<ListItem> fileItemList;
     private Exception exception;
@@ -39,7 +39,7 @@ public class ListExampleLoader extends AsyncTaskLoader<List<ListItem>> {
 
     private static final int ITEMS_PER_REQUEST = 20;
 
-    private static Collator collator = Collator.getInstance();
+    private static final Collator collator = Collator.getInstance();
 
     static {
         collator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
@@ -78,7 +78,7 @@ public class ListExampleLoader extends AsyncTaskLoader<List<ListItem>> {
 
     @Override
     public List<ListItem> loadInBackground() {
-        fileItemList = new ArrayList<ListItem>();
+        fileItemList = new ArrayList<>();
         hasCancelled = false;
         TransportClient client = null;
         try {
@@ -100,7 +100,7 @@ public class ListExampleLoader extends AsyncTaskLoader<List<ListItem>> {
                         @Override
                         public void run() {
                             Collections.sort(fileItemList, FILE_ITEM_COMPARATOR);
-                            deliverResult(new ArrayList<ListItem>(fileItemList));
+                            deliverResult(new ArrayList<>(fileItemList));
                         }
                     });
                 }
@@ -120,10 +120,7 @@ public class ListExampleLoader extends AsyncTaskLoader<List<ListItem>> {
             exception = null;
         } catch (CancelledPropfindException ex) {
             return fileItemList;
-        } catch (WebdavException ex) {
-            Log.d(TAG, "loadInBackground", ex);
-            exception = ex;
-        } catch (IOException ex) {
+        } catch (WebdavException | IOException ex) {
             Log.d(TAG, "loadInBackground", ex);
             exception = ex;
         } finally {

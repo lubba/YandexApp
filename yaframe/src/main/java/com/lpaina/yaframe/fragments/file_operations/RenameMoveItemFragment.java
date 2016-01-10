@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -84,6 +85,7 @@ public class RenameMoveItemFragment extends IODialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
@@ -129,10 +131,7 @@ public class RenameMoveItemFragment extends IODialogFragment {
                     try {
                         client = TransportClient.getInstance(context, credentials);
                         client.move(srcPath, dstPath);
-                    } catch (IOException ex) {
-                        Log.d(TAG, "renameMoveItem", ex);
-                        sendException(ex);
-                    } catch (WebdavException ex) {
+                    } catch (IOException | WebdavException ex) {
                         Log.d(TAG, "renameMoveItem", ex);
                         sendException(ex);
                     } finally {

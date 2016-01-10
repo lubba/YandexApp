@@ -21,6 +21,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
@@ -35,11 +36,11 @@ import java.util.regex.Pattern;
 
 public class ExampleActivity extends FragmentActivity {
 
-    private static String TAG = "ExampleActivity";
+    private static final String TAG = "ExampleActivity";
 
     private static final int GET_ACCOUNT_CREDS_INTENT = 100;
 
-    public static String FRAGMENT_TAG = "list";
+    public static final String FRAGMENT_TAG = "list";
 
     // create your own client id/secret pair with callback url on oauth.yandex.ru
     public static final String CLIENT_ID = "82e97a6ea25547478f7824c572e7c625";
@@ -50,8 +51,8 @@ public class ExampleActivity extends FragmentActivity {
     private static final String ACTION_ADD_ACCOUNT = "com.yandex.intent.ADD_ACCOUNT";
     private static final String KEY_CLIENT_SECRET = "clientSecret";
 
-    public static String USERNAME = "example.username";
-    public static String TOKEN = "example.token";
+    public static final String USERNAME = "example.username";
+    public static final String TOKEN = "example.token";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,13 +185,7 @@ public class ExampleActivity extends FragmentActivity {
                     saveToken(token);
                     startFragment();
                 }
-            } catch (OperationCanceledException ex) {
-                Log.d(TAG, "GetAuthTokenCallback", ex);
-                Toast.makeText(ExampleActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
-            } catch (AuthenticatorException ex) {
-                Log.d(TAG, "GetAuthTokenCallback", ex);
-                Toast.makeText(ExampleActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
-            } catch (IOException ex) {
+            } catch (OperationCanceledException | AuthenticatorException | IOException ex) {
                 Log.d(TAG, "GetAuthTokenCallback", ex);
                 Toast.makeText(ExampleActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
             }
@@ -203,6 +198,7 @@ public class ExampleActivity extends FragmentActivity {
             super();
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return new AlertDialog.Builder(getActivity())
@@ -225,6 +221,4 @@ public class ExampleActivity extends FragmentActivity {
                     .create();
         }
     }
-
-    ;
 }

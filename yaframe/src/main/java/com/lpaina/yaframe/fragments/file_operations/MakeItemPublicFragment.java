@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -87,6 +88,7 @@ public class MakeItemPublicFragment extends IODialogFragment {
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
@@ -139,10 +141,7 @@ public class MakeItemPublicFragment extends IODialogFragment {
                         } else {
                             client.unpublish(path);
                         }
-                    } catch (IOException ex) {
-                        Log.d(TAG, "makePublicOrExpire", ex);
-                        sendException(ex);
-                    } catch (WebdavException ex) {
+                    } catch (IOException | WebdavException ex) {
                         Log.d(TAG, "makePublicOrExpire", ex);
                         sendException(ex);
                     } finally {
@@ -185,6 +184,7 @@ public class MakeItemPublicFragment extends IODialogFragment {
             url = getArguments().getString(NEW_PUBLIC_URL);
         }
 
+        @NonNull
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             return new AlertDialog.Builder(getActivity())
