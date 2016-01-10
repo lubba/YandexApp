@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/yaframe/yaframe.iml" filepath="$PROJECT_DIR$/yaframe/yaframe.iml" />
       <module fileurl="file://$PROJECT_DIR$/yandex-disk-sdk/yandex-disk-sdk.iml" filepath="$PROJECT_DIR$/yandex-disk-sdk/yandex-disk-sdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yandex-disk-sdk-example/yandex-disk-sdk-example.iml" filepath="$PROJECT_DIR$/yandex-disk-sdk-example/yandex-disk-sdk-example.iml" />
     </modules>
   </component>
 </project>
