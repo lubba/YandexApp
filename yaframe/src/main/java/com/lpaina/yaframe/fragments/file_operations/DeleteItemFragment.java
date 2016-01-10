@@ -4,7 +4,7 @@
  *
  */
 
-package com.lpaina.yaframe;
+package com.lpaina.yaframe.fragments.file_operations;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -16,33 +16,40 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.lpaina.yaframe.ExampleActivity;
+import com.lpaina.yaframe.R;
+import com.lpaina.yaframe.fragments.IODialogFragment;
+import com.lpaina.yaframe.fragments.IODialogRetainedFragment;
 import com.yandex.disk.client.Credentials;
 import com.yandex.disk.client.TransportClient;
 import com.yandex.disk.client.exceptions.WebdavException;
 
 import java.io.IOException;
 
-public class RenameMoveItemFragment extends IODialogFragment {
+public class DeleteItemFragment extends IODialogFragment {
 
-    private static final String TAG = "RenameMoveItemFragment";
+    private static final String TAG = "DeleteItemFragment";
 
-    private static final String WORK_FRAGMENT_TAG = "RenameMoveItemFragment.Background";
+    private static final String WORK_FRAGMENT_TAG = "DeleteItemFragment.Background";
 
-    private static final String MOVE_SRC_PATH = "example.move.src.path";
-    private static final String MOVE_DST_PATH = "example.move.dst.path";
+    private static final String DELETE_PATH = "example.delete.path";
+    private static final String DELETE_DISPLAY_NAME = "example.delete.display.name";
+    private static final String DELETE_IS_COLLECTION = "example.delete.is.collection";
 
     private Credentials credentials;
-    private String srcPath, dstPath;
+    private String path, displayName;
+    private boolean isCollection;
 
-    private RenameMoveItemRetainedFragment workFragment;
+    private DeleteItemRetainedFragment workFragment;
 
-    public static RenameMoveItemFragment newInstance(Credentials credentials, String srcPath, String dstPath) {
-        RenameMoveItemFragment fragment = new RenameMoveItemFragment();
+    public static DeleteItemFragment newInstance(Credentials credentials, String path, String displayName, boolean isCollection) {
+        DeleteItemFragment fragment = new DeleteItemFragment();
 
         Bundle args = new Bundle();
         args.putParcelable(CREDENTIALS, credentials);
-        args.putString(MOVE_SRC_PATH, srcPath);
-        args.putString(MOVE_DST_PATH, dstPath);
+        args.putString(DELETE_PATH, path);
+        args.putString(DELETE_DISPLAY_NAME, displayName);
+        args.putBoolean(DELETE_IS_COLLECTION, isCollection);
         fragment.setArguments(args);
 
         return fragment;
@@ -53,8 +60,9 @@ public class RenameMoveItemFragment extends IODialogFragment {
         super.onCreate(savedInstanceState);
 
         credentials = getArguments().getParcelable(CREDENTIALS);
-        srcPath = getArguments().getString(MOVE_SRC_PATH);
-        dstPath = getArguments().getString(MOVE_DST_PATH);
+        path = getArguments().getString(DELETE_PATH);
+        displayName = getArguments().getString(DELETE_DISPLAY_NAME);
+        isCollection = getArguments().getBoolean(DELETE_IS_COLLECTION);
     }
 
     @Override
@@ -62,11 +70,11 @@ public class RenameMoveItemFragment extends IODialogFragment {
         super.onActivityCreated(savedInstanceState);
 
         FragmentManager fragmentManager = getFragmentManager();
-        workFragment = (RenameMoveItemRetainedFragment) fragmentManager.findFragmentByTag(WORK_FRAGMENT_TAG);
+        workFragment = (DeleteItemRetainedFragment) fragmentManager.findFragmentByTag(WORK_FRAGMENT_TAG);
         if (workFragment == null || workFragment.getTargetFragment() == null) {
-            workFragment = new RenameMoveItemRetainedFragment();
+            workFragment = new DeleteItemRetainedFragment();
             fragmentManager.beginTransaction().add(workFragment, WORK_FRAGMENT_TAG).commit();
-            workFragment.renameMoveItem(getActivity(), credentials, srcPath, dstPath);
+            workFragment.deleteItem(getActivity(), credentials, path);
         }
         workFragment.setTargetFragment(this, 0);
     }
@@ -83,8 +91,8 @@ public class RenameMoveItemFragment extends IODialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
-        dialog.setTitle(R.string.example_move_rename_item_title);
-        dialog.setMessage(dstPath);
+        dialog.setTitle(isCollection ? R.string.example_delete_folder_title : R.string.example_delete_file_title);
+        dialog.setMessage(displayName);
         dialog.setIndeterminate(true);
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         dialog.setButton(ProgressDialog.BUTTON_NEUTRAL, getText(R.string.example_make_folder_negative_button), new DialogInterface.OnClickListener() {
@@ -109,13 +117,13 @@ public class RenameMoveItemFragment extends IODialogFragment {
 
     public void onComplete() {
         dialog.dismiss();
-        Toast.makeText(getActivity(), R.string.example_move_rename_item_done, Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), isCollection ? R.string.example_delete_folder_done : R.string.example_delete_file_done, Toast.LENGTH_LONG).show();
         ((ExampleActivity) getActivity()).reloadContent();
     }
 
-    public static class RenameMoveItemRetainedFragment extends IODialogRetainedFragment {
+    public static class DeleteItemRetainedFragment extends IODialogRetainedFragment {
 
-        public void renameMoveItem(final Context context, final Credentials credentials, final String srcPath, final String dstPath) {
+        public void deleteItem(final Context context, final Credentials credentials, final String path) {
 
             new AsyncTask<Void, Void, Void>() {
 
@@ -124,12 +132,12 @@ public class RenameMoveItemFragment extends IODialogFragment {
                     TransportClient client = null;
                     try {
                         client = TransportClient.getInstance(context, credentials);
-                        client.move(srcPath, dstPath);
+                        client.delete(path);
                     } catch (IOException ex) {
-                        Log.d(TAG, "renameMoveItem", ex);
+                        Log.d(TAG, "deleteItem", ex);
                         sendException(ex);
                     } catch (WebdavException ex) {
-                        Log.d(TAG, "renameMoveItem", ex);
+                        Log.d(TAG, "deleteItem", ex);
                         sendException(ex);
                     } finally {
                         TransportClient.shutdown(client);
@@ -139,7 +147,7 @@ public class RenameMoveItemFragment extends IODialogFragment {
 
                 @Override
                 protected void onPostExecute(Void aVoid) {
-                    RenameMoveItemFragment targetFragment = (RenameMoveItemFragment) getTargetFragment();
+                    DeleteItemFragment targetFragment = (DeleteItemFragment) getTargetFragment();
                     if (targetFragment != null) {
                         targetFragment.onComplete();
                     }

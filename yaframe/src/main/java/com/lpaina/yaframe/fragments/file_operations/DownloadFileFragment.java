@@ -4,49 +4,51 @@
  *
  */
 
-package com.lpaina.yaframe;
+package com.lpaina.yaframe.fragments.file_operations;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.lpaina.yaframe.R;
+import com.lpaina.yaframe.fragments.IODialogFragment;
+import com.lpaina.yaframe.fragments.IODialogRetainedFragment;
 import com.yandex.disk.client.Credentials;
+import com.yandex.disk.client.ListItem;
 import com.yandex.disk.client.ProgressListener;
 import com.yandex.disk.client.TransportClient;
-import com.yandex.disk.client.exceptions.CancelledUploadingException;
 import com.yandex.disk.client.exceptions.WebdavException;
 
+import java.io.File;
 import java.io.IOException;
 
-public class UploadFileFragment extends IODialogFragment {
+public class DownloadFileFragment extends IODialogFragment {
 
     private static final String TAG = "LoadFileFragment";
 
-    private static final String WORK_FRAGMENT_TAG = "UploadFileFragment.Background";
+    private static final String WORK_FRAGMENT_TAG = "LoadFileFragment.Background";
 
-    private static final String CREDENTIALS = "example.credentials";
-    private static final String SERVER_PATH = "example.server.path";
-    private static final String LOCAL_FILE = "example.local.file";
+    private static final String FILE_ITEM = "example.file.item";
 
     private static final int PROGRESS_DIV = 1024 * 1024;
 
     private Credentials credentials;
-    private String serverPath, localFile;
+    private ListItem item;
 
-    private UploadFileRetainedFragment workFragment;
+    private DownloadFileRetainedFragment workFragment;
 
-    public static UploadFileFragment newInstance(Credentials credentials, String serverPath, String localFile) {
-        UploadFileFragment fragment = new UploadFileFragment();
+    public static DownloadFileFragment newInstance(Credentials credentials, ListItem item) {
+        DownloadFileFragment fragment = new DownloadFileFragment();
 
         Bundle args = new Bundle();
         args.putParcelable(CREDENTIALS, credentials);
-        args.putString(SERVER_PATH, serverPath);
-        args.putString(LOCAL_FILE, localFile);
+        args.putParcelable(FILE_ITEM, item);
         fragment.setArguments(args);
 
         return fragment;
@@ -57,8 +59,7 @@ public class UploadFileFragment extends IODialogFragment {
         super.onCreate(savedInstanceState);
 
         credentials = getArguments().getParcelable(CREDENTIALS);
-        serverPath = getArguments().getString(SERVER_PATH);
-        localFile = getArguments().getString(LOCAL_FILE);
+        item = getArguments().getParcelable(FILE_ITEM);
     }
 
     @Override
@@ -66,11 +67,11 @@ public class UploadFileFragment extends IODialogFragment {
         super.onActivityCreated(savedInstanceState);
 
         FragmentManager fragmentManager = getFragmentManager();
-        workFragment = (UploadFileRetainedFragment) fragmentManager.findFragmentByTag(WORK_FRAGMENT_TAG);
+        workFragment = (DownloadFileRetainedFragment) fragmentManager.findFragmentByTag(WORK_FRAGMENT_TAG);
         if (workFragment == null || workFragment.getTargetFragment() == null) {
-            workFragment = new UploadFileRetainedFragment();
+            workFragment = new DownloadFileRetainedFragment();
             fragmentManager.beginTransaction().add(workFragment, WORK_FRAGMENT_TAG).commit();
-            workFragment.uploadFile(getActivity(), credentials, serverPath, localFile);
+            workFragment.loadFile(getActivity(), credentials, item);
         }
         workFragment.setTargetFragment(this, 0);
     }
@@ -87,8 +88,8 @@ public class UploadFileFragment extends IODialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         dialog = new ProgressDialog(getActivity());
-        dialog.setTitle(R.string.example_uploading_file_title);
-        dialog.setMessage(localFile);
+        dialog.setTitle(R.string.example_loading_file_title);
+        dialog.setMessage(item.getDisplayName());
         dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         dialog.setIndeterminate(true);
         dialog.setButton(ProgressDialog.BUTTON_NEUTRAL, getString(R.string.example_loading_file_cancel_button), new DialogInterface.OnClickListener() {
@@ -110,12 +111,20 @@ public class UploadFileFragment extends IODialogFragment {
     }
 
     private void onCancel() {
-        workFragment.cancelUpload();
+        workFragment.cancelDownload();
     }
 
-    public void onUploadComplete() {
+    public void onDownloadComplete(File file) {
         dialog.dismiss();
-        Toast.makeText(getActivity(), R.string.example_file_uploaded_toast, Toast.LENGTH_LONG).show();
+        makeWorldReadableAndOpenFile(file);
+    }
+
+    private void makeWorldReadableAndOpenFile(File file) {
+        file.setReadable(true, false);
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(file), item.getContentType());
+        startActivity(Intent.createChooser(intent, getText(R.string.example_loading_file_chooser_title)));
     }
 
     public void setDownloadProgress(long loaded, long total) {
@@ -133,22 +142,22 @@ public class UploadFileFragment extends IODialogFragment {
         }
     }
 
-    public static class UploadFileRetainedFragment extends IODialogRetainedFragment implements ProgressListener {
+    public static class DownloadFileRetainedFragment extends IODialogRetainedFragment implements ProgressListener {
 
         private boolean cancelled;
+        private File result;
 
-        public void uploadFile(final Context context, final Credentials credentials, final String serverPath, final String localFile) {
+        public void loadFile(final Context context, final Credentials credentials, final ListItem item) {
+            result = new File(context.getFilesDir(), new File(item.getFullPath()).getName());
 
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     TransportClient client = null;
                     try {
-                        client = TransportClient.getUploadInstance(context, credentials);
-                        client.uploadFile(localFile, serverPath, UploadFileRetainedFragment.this);
-                        uploadComplete();
-                    } catch (CancelledUploadingException ex) {
-                        // cancelled by user
+                        client = TransportClient.getInstance(context, credentials);
+                        client.downloadFile(item.getFullPath(), result, DownloadFileRetainedFragment.this);
+                        downloadComplete();
                     } catch (IOException ex) {
                         Log.d(TAG, "loadFile", ex);
                         sendException(ex);
@@ -156,7 +165,9 @@ public class UploadFileFragment extends IODialogFragment {
                         Log.d(TAG, "loadFile", ex);
                         sendException(ex);
                     } finally {
-                        TransportClient.shutdown(client);
+                        if (client != null) {
+                            client.shutdown();
+                        }
                     }
                 }
             }).start();
@@ -167,7 +178,7 @@ public class UploadFileFragment extends IODialogFragment {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    UploadFileFragment targetFragment = (UploadFileFragment) getTargetFragment();
+                    DownloadFileFragment targetFragment = (DownloadFileFragment) getTargetFragment();
                     if (targetFragment != null) {
                         targetFragment.setDownloadProgress(loaded, total);
                     }
@@ -180,19 +191,19 @@ public class UploadFileFragment extends IODialogFragment {
             return cancelled;
         }
 
-        public void uploadComplete() {
+        public void downloadComplete() {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    UploadFileFragment targetFragment = (UploadFileFragment) getTargetFragment();
+                    DownloadFileFragment targetFragment = (DownloadFileFragment) getTargetFragment();
                     if (targetFragment != null) {
-                        targetFragment.onUploadComplete();
+                        targetFragment.onDownloadComplete(result);
                     }
                 }
             });
         }
 
-        public void cancelUpload() {
+        public void cancelDownload() {
             cancelled = true;
         }
     }

@@ -4,7 +4,7 @@
  *
  */
 
-package com.lpaina.yaframe;
+package com.lpaina.yaframe.fragments;
 
 import android.os.Bundle;
 import android.os.Handler;

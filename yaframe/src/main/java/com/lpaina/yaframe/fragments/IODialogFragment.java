@@ -4,7 +4,7 @@
  *
  */
 
-package com.lpaina.yaframe;
+package com.lpaina.yaframe.fragments;
 
 import android.app.ProgressDialog;
 import android.support.v4.app.DialogFragment;

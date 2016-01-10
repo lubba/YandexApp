@@ -4,7 +4,7 @@
  *
  */
 
-package com.lpaina.yaframe;
+package com.lpaina.yaframe.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,6 +35,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.lpaina.yaframe.ExampleActivity;
+import com.lpaina.yaframe.ListExampleLoader;
+import com.lpaina.yaframe.R;
+import com.lpaina.yaframe.fragments.file_operations.DeleteItemFragment;
+import com.lpaina.yaframe.fragments.file_operations.DownloadFileFragment;
+import com.lpaina.yaframe.fragments.file_operations.MakeFolderFragment;
+import com.lpaina.yaframe.fragments.file_operations.MakeItemPublicFragment;
+import com.lpaina.yaframe.fragments.file_operations.RenameMoveItemFragment;
+import com.lpaina.yaframe.fragments.file_operations.UploadFileFragment;
 import com.yandex.disk.client.Credentials;
 import com.yandex.disk.client.ListItem;
 

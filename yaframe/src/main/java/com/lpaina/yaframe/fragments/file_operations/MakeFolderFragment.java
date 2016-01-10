@@ -4,7 +4,7 @@
  *
  */
 
-package com.lpaina.yaframe;
+package com.lpaina.yaframe.fragments.file_operations;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -16,6 +16,10 @@ import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.lpaina.yaframe.ExampleActivity;
+import com.lpaina.yaframe.R;
+import com.lpaina.yaframe.fragments.IODialogFragment;
+import com.lpaina.yaframe.fragments.IODialogRetainedFragment;
 import com.yandex.disk.client.Credentials;
 import com.yandex.disk.client.TransportClient;
 import com.yandex.disk.client.exceptions.WebdavException;
